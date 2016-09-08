@@ -32,12 +32,12 @@
     src={{item}}
     dest="backup/{{ansible_date_time.date}}-{{ansible_date_time.time|regex_replace(':', '')}}"
   with_items:
-    - "{{is_step_tickers_setting.backup_file}}"
+    - "{{is_step_tickers_setting.results[0].backup_file}}"
     - /etc/ntp/step-tickers
   when: is_step_tickers_setting|changed
 
 - name: (centos6) delete step-tickers setting backup
-  file: path={{is_step_tickers_setting.backup_file}} state=absent
+  file: path={{is_step_tickers_setting.results[0].backup_file}} state=absent
   when: is_step_tickers_setting|changed
 
 - name: (centos6) ntp.conf settings
@@ -52,12 +52,12 @@
     src={{item}}
     dest="backup/{{ansible_date_time.date}}-{{ansible_date_time.time|regex_replace(':', '')}}"
   with_items:
-    - "{{is_ntp_conf_setting.backup_file}}"
+    - "{{is_ntp_conf_setting.results[0].backup_file}}"
     - /etc/ntp.conf
   when: is_ntp_conf_setting|changed
 
 - name: (centos6) delete ntp.conf setting backup
-  file: path={{is_ntp_conf_setting.backup_file}} state=absent
+  file: path={{is_ntp_conf_setting.results[0].backup_file}} state=absent
   when: is_ntp_conf_setting|changed
 
 - name: (centos6) /etc/sysconfig/ntpd settings
@@ -72,13 +72,15 @@
     src={{item}}
     dest="backup/{{ansible_date_time.date}}-{{ansible_date_time.time|regex_replace(':', '')}}"
   with_items:
-    - "{{is_ntpd_setting.backup_file}}"
+    - "{{is_ntpd_setting.results[0].backup_file}}"
     - /etc/sysconfig/ntpd
   when: is_ntpd_setting|changed
 
 - name: (centos6) delete ntpd setting backup
-  file: path={{is_ntpd_setting.backup_file}} state=absent
+  file: path={{is_ntpd_setting.results[0].backup_file}} state=absent
   when: is_ntpd_setting|changed
+
+- debug: var=is_ntpd_setting
 
 - name: (centos6) ntpd running check
   command: service ntpd status

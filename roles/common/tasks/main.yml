@@ -32,7 +32,7 @@
   lineinfile: dest=/etc/hosts regexp='^{{item}}.*' line="{{item}} {{hostvars[item].ansible_fqdn}} {{hostvars[item].ansible_hostname}}" state=present backup=true
   when: hostvars[item].ansible_fqdn is defined
   register: is_hosts_setting
-  with_items: groups['all']
+  with_items: "{{groups['all']}}"
 
 - name: backup hosts setting
   fetch:
@@ -90,7 +90,7 @@
     src={{item}}
     dest="backup/{{ansible_date_time.date}}-{{ansible_date_time.time|regex_replace(':', '')}}"
   with_items:
-    - "{{is_ulimits_setting.backup_file}}"
+    - "{{is_ulimits_setting.results[0].backup_file}}"
     - /etc/profile.d/enableulimit.sh
   when: is_ulimits_setting|changed
 
@@ -110,7 +110,7 @@
   group:
     name={{item.group}}
     gid={{item.gid}}
-  with_items: common_user
+  with_items: "{{common_user}}"
   when: common_user is defined
 
 - name: Add common user
@@ -120,7 +120,7 @@
     uid="{{item.uid}}"
     group="{{item.group}}"
     comment="{{item.name}}"
-  with_items: common_user
+  with_items: "{{common_user}}"
   when: common_user is defined
 
 - name: reboot after change selinux
