@@ -80,8 +80,6 @@
   file: path={{is_ntpd_setting.results[0].backup_file}} state=absent
   when: is_ntpd_setting|changed
 
-- debug: var=is_ntpd_setting
-
 - name: (centos6) ntpd running check
   command: service ntpd status
   register: running_ntpd
