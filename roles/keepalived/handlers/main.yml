@@ -1,0 +1,13 @@
+---
+# file: roles/keepalived/handlers/main.yml
+- name: httpd restart
+  service: name=httpd state=restarted
+
+- name: sysctl restart
+  command: /sbin/sysctl -p
+
+- name: network restart
+  command: service network restart
+
+- name: keepalived restart
+  command: service keepalived restart

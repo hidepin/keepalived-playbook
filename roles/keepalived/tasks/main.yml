@@ -1,0 +1,45 @@
+---
+# file: roles/keepalived/tasks/main.yml
+- name: keepalived packages install
+  yum: name={{item}} state=present
+  with_items:
+    - keepalived
+    - ipvsadm
+    - httpd
+
+- name: create lvs check dir
+  file: path=/var/www/html/check state=directory mode=0755 owner=root group=root
+
+- name: add check.html
+  template: src=check.html.j2 dest=/var/www/html/check/check.html owner=root group=root mode=0644
+
+- name: add index.html
+  template: src=index.html.j2 dest=/var/www/html/index.html owner=root group=root mode=0644
+
+- name: setting httpd ServerName
+  lineinfile:
+    name=/etc/httpd/conf/httpd.conf
+    regexp="^ServerName "
+    insertafter="^#ServerName "
+    line="ServerName {{ansible_fqdn}}"
+  register: is_httpd_setting
+  notify: httpd restart
+
+- name: httpd service enabled
+  service: name=httpd state=started enabled=yes
+
+- name: sysctl.conf for keepalived
+  template: src=sysctl.conf.j2 dest=/etc/sysctl.conf owner=root group=root mode=0644 backup=yes
+  register: is_sysctl_setting
+  notify: sysctl restart
+
+- name: add lo device
+  template: src=ifcfg-lo.j2 dest=/etc/sysconfig/network-scripts/ifcfg-lo:0 owner=root group=root mode=0644
+  notify: network restart
+
+- name: add keepalived.conf
+  template: src=keepalived.conf.j2 dest=/etc/keepalived/keepalived.conf owner=root group=root mode=0644
+  notify: keepalived restart
+
+- name: keepalived service enabled
+  service: name=keepalived state=started enabled=yes
